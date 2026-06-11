@@ -1,7 +1,7 @@
 # ==========================================
 # Stage 1: Build virtual environment
 # ==========================================
-FROM python:3.11-slim AS builder
+FROM python:3.12-slim AS builder
 
 WORKDIR /app
 
@@ -20,7 +20,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # ==========================================
 # Stage 2: Final lightweight runner image
 # ==========================================
-FROM python:3.11-slim AS runner
+FROM python:3.12-slim AS runner
 
 WORKDIR /app
 
@@ -39,9 +39,8 @@ RUN groupadd -g 10001 appgroup && \
 # Copy application source code
 COPY app /app/app
 
-# Pre-create SQLite database file with correct user permissions
-RUN touch /app/auth_service.db && \
-    chown -R appuser:appgroup /app
+# Pre-set app folder permissions
+RUN chown -R appuser:appgroup /app
 
 # Switch to non-root user
 USER appuser
