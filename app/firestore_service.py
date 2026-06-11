@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv()
+load_dotenv(override=True)
 
 logger = logging.getLogger(__name__)
 
@@ -64,8 +64,15 @@ class FirestoreService:
                     return firestore.Client()
                 return None
             
-            # Format the private key to replace escaped literal '\n' with actual newlines
-            formatted_private_key = private_key.replace("\\n", "\n")
+            # Strip any surrounding quotes that may be preserved by Docker env file loaders
+            private_key = private_key.strip()
+            if private_key.startswith('"') and private_key.endswith('"'):
+                private_key = private_key[1:-1].strip()
+            elif private_key.startswith("'") and private_key.endswith("'"):
+                private_key = private_key[1:-1].strip()
+
+            # Format the private key to replace escaped literal '\n' or '\\n' with actual newlines
+            formatted_private_key = private_key.replace("\\\\n", "\n").replace("\\n", "\n")
             
             key_data = {
                 "type": "service_account",
